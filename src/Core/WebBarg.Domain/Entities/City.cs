@@ -12,8 +12,10 @@ public class City : BaseEntity
 {
     [MaxLength(100)]
     public string Name { get; set; }
+
+    // Foreign key
     public int CountryId { get; set; }
 
-    [ForeignKey(nameof(CountryId))]
+    // Navigation property
     public Country Country { get; set; }
 }

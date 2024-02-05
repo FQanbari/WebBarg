@@ -12,11 +12,12 @@ public class User : BaseEntity
     public string Name { get; set; }
     public string Family { get; set; }
     public string Picture { get; set; }
+
+    // Foreign keys
     public int CityId { get; set; }
     public int CountryId { get; set; }
 
-    [ForeignKey(nameof(CityId))]
+    // Navigation properties
     public City City { get; set; }
-    [ForeignKey(nameof(CountryId))]
     public Country Country { get; set; }
 }

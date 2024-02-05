@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Design;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,10 +14,14 @@ namespace WebBarg.Infrastructure.Context;
 
 public class AppDbContext : DbContext
 {
-
+    //public DbSet<User> Users { get; set; }
+    //public DbSet<City> Cities { get; set; }
+    //public DbSet<Country> Countries { get; set; }
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
     {
-
+        //Users = Set<User>();
+        //Cities = Set<City>();
+        //Countries = Set<Country>();
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -28,19 +33,85 @@ public class AppDbContext : DbContext
         modelBuilder.RegisterAllEntities<IEntity>(entitiesAssembly);
         modelBuilder.AddRestrictDeleteBehaviorConvention();
 
-        Seed(modelBuilder);
+        SeedData(modelBuilder);
 
     }
-    private void Seed(ModelBuilder modelBuilder)
+    private void SeedData(ModelBuilder modelBuilder)
     {
 
-        List<Country> countriesWithCities = SeedData.GetCountriesWithCities();
-        modelBuilder.Entity<Country>().HasData(countriesWithCities);
+        var cities = new List<City>();
+        var countries = new List<Country>();
+
+        for (int i = 0; i < 50; i++)
+        {
+            var country = new Country { Name = $"Country{i + 1}" };
+            countries.Add(country);
+
+            var city = new City { Name = $"City{i + 1}", CountryId = country.Id };
+            cities.Add(city);
+        }
+
+        //modelBuilder.Entity<Country>().HasData(countries);
+        //modelBuilder.Entity<City>().HasData(cities);
+        // Seed users
+        var users = new List<User>();
+
+        for (int i = 0; i < 50; i++)
+        {
+            var user = new User
+            {
+                Name = $"User{i + 1}",
+                Family = $"Family{i + 1}",
+                Picture = $"user{i + 1}.jpg",
+                City = countries[i % 50].Cities[i % 50], // Assign cities in a round-robin fashion
+                Country = countries[i % 50] // Assign countries in a round-robin fashion
+            };
+
+            users.Add(user);
+        }
+
+        modelBuilder.Entity<User>().HasData(users, countries, cities);
     }
 }
 
 public class SeedData
 {
+    public static List<User> GetUsers(ModelBuilder modelBuilder)
+    {
+        var cities = new List<City>();
+        var countries = new List<Country>();
+
+        for (int i = 0; i < 50; i++)
+        {
+            var country = new Country { Id = i + 1, Name = $"Country{i + 1}" };
+            countries.Add(country);
+
+            var city = new City { Id = i + 1, Name = $"City{i + 1}", CountryId = country.Id };
+            cities.Add(city);
+        }
+
+        modelBuilder.Entity<Country>().HasData(countries);
+        modelBuilder.Entity<City>().HasData(cities);
+        // Seed users
+        var users = new List<User>();
+
+            for (int i = 0; i < 50; i++)
+            {
+                var user = new User
+                {
+                    Name = $"User{i + 1}",
+                    Family = $"Family{i + 1}",
+                    Picture = $"user{i + 1}.jpg",
+                    City = countries[i % 50].Cities[i % 50], // Assign cities in a round-robin fashion
+                    Country = countries[i % 50] // Assign countries in a round-robin fashion
+                };
+
+                users.Add(user);
+            }
+
+        return users;
+    
+    }
     public static List<Country> GetCountriesWithCities()
     {
         var countries = new List<Country>
@@ -55,7 +126,7 @@ public class SeedData
             new Country { Name = "Brazil", Cities = GetCitiesForCountry("Brazil", 10) },
             new Country { Name = "India", Cities = GetCitiesForCountry("India", 10) },
             new Country { Name = "South Africa", Cities = GetCitiesForCountry("South Africa", 10) },
-            // Add more countries as needed
+         
         };
 
         return countries;
@@ -69,5 +140,43 @@ public class SeedData
             cities.Add(new City { Name = $"{countryName} City {i}" });
         }
         return cities;
+    }
+    public static List<User> GetUsers()
+    {
+
+
+        // Seed initial users with different cities and countries
+        var users = new List<User>();
+        var random = new Random();
+
+        for (int i = 0; i < 10; i++)
+        {
+            // Generate random city and country for each user
+            var city = new City { Name = $"City{i + 1}" };
+            var country = new Country { Name = $"Country{i + 1}" };
+            city.Country = country;
+
+            var user = new User
+            {
+                Name = $"User{i + 1}",
+                CityId = random.Next(1,11),
+                CountryId = random.Next(1, 11)
+            };
+
+            users.Add(user);
+        }
+
+        return users;
+    }
+}
+
+public class AppDbContextFactory : IDesignTimeDbContextFactory<AppDbContext>
+{ 
+    AppDbContext IDesignTimeDbContextFactory<AppDbContext>.CreateDbContext(string[] args)
+    {
+        var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
+        optionsBuilder.UseSqlServer("Data Source=192.168.1.12;Initial Catalog=WebBargDb;User ID=sa;Password=ASdf!@34;TrustServerCertificate=True");
+
+        return new AppDbContext(optionsBuilder.Options);
     }
 }

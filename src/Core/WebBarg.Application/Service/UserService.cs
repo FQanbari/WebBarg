@@ -5,7 +5,7 @@ using WebBarg.Domain.Repos;
 
 namespace WebBarg.Application.Service;
 
-public class UserService
+public class UserService : IUserService
 {
     private readonly IUserRepository _userRepository;
     private readonly IUnitOfWork _unitOfWork;
@@ -19,12 +19,12 @@ public class UserService
 
     public async Task<IEnumerable<User>> GetAllUsersAsync(string filter, int pageNumber, CancellationToken cancellationToken)
     {
-        return await _unitOfWork.UserRepository.GetListPaging(x => x.Name.Contains(filter),cancellationToken,pageSize : 10, pageNumber);
+        return await _unitOfWork.UserRepository.GetListPaging(x => x.Name.Contains(filter), cancellationToken, pageSize: 10, pageNumber);
     }
 
     public async Task<User> CreateUserAsync(User newUser, CancellationToken cancellationToken)
     {
-        await _userRepository.Create(newUser,cancellationToken);
+        await _userRepository.Create(newUser, cancellationToken);
         await _unitOfWork.Save();
         return newUser;
     }
