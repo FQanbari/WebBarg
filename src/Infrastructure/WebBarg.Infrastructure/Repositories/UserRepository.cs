@@ -16,7 +16,7 @@ public class UserRepository : GenericRepository<User>, IUserRepository
 
     public async Task<List<UserStatistics>> GetListByCity(Expression<Func<User, bool>> predicate, CancellationToken cancellationToken)
     {
-        var userList = await Table.AsNoTracking()
+        var userList = await Table.Include(x => x.City).Include(x => x.Country).AsNoTracking()
         .Where(predicate)
         .ToListAsync(cancellationToken);
 

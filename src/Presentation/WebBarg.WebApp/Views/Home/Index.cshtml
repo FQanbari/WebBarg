@@ -28,7 +28,7 @@
         async function fetchDataAndRefreshChart() {
             // Fetch data from your API endpoint with the filter value
             var filterValue = filterInput.value;
-            var response = await fetch(`/YourController/ChartPie?filter=${filterValue}`);
+            var response = await fetch(`api/User/ChartPie?filter=${filterValue}`);
             var data = await response.json();
 
             // Update pie chart data

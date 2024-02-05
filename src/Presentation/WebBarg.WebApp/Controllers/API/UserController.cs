@@ -6,7 +6,7 @@ using WebBarg.Domain.Entities;
 
 namespace WebBarg.WebApp.Controllers.API
 {
-    [Route("api/[controller]")]
+    [Route("api/[controller]/[action]")]
     [ApiController]
     public class UserController : ControllerBase
     {
@@ -47,6 +47,7 @@ namespace WebBarg.WebApp.Controllers.API
         public void Delete(int id)
         {
         }
+
         [HttpGet]
         public async Task<List<UserStatistics>> ChartPie(string filter, CancellationToken cancellationToken)
         {

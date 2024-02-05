@@ -18,6 +18,6 @@ public class User : BaseEntity
     public int CountryId { get; set; }
 
     // Navigation properties
-    public City City { get; set; }
-    public Country Country { get; set; }
+    public virtual City City { get; set; }
+    public virtual Country Country { get; set; }
 }

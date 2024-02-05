@@ -8,5 +8,5 @@ public class Country : BaseEntity
     public string Name { get; set; }
 
     // Navigation property
-    public List<City> Cities { get; set; }
+    public virtual ICollection<City> Cities { get; set; } = new List<City>();
 }

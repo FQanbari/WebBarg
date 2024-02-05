@@ -17,5 +17,5 @@ public class City : BaseEntity
     public int CountryId { get; set; }
 
     // Navigation property
-    public Country Country { get; set; }
+    public virtual Country Country { get; set; }
 }
