@@ -1,15 +1,57 @@
 ﻿@using System.Web.Helpers
-
+@* @using WebBarg.Application.DTO
+@model X.PagedList.IPagedList<UserDto> *@
 @{
     ViewData["Title"] = "Home Page";
 }
 
+<style>
+    .wrapper {
+        width: 400px;
+        height: 400px;
+        border: 1px solid black; /* for demonstration purposes*/
+    }
+</style>
 <div class="text-center">
     <h1 class="display-4">Welcome</h1>
     <input type="text" id="filterInput" placeholder="Enter Filter Value" />
     <button id="refreshButton">Refresh Data</button>
-    <canvas id="pieChart" width="400" height="400"></canvas>
 
+    <div class="wrapper">
+        <canvas id="pieChart" width="400" height="400"></canvas>
+    </div>
+    <div>
+        <h2>User List</h2>
+
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Family</th>
+                    <th>City</th>
+                    <th>Country</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var user in Model)
+                {
+                    <tr>
+                        <td>@user.Name</td>
+                        <td>@user.Family</td>
+                        <td>@user.CityName</td>
+                        <td>@user.CountryName</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        @* <div>
+            Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
+        </div>
+        <div>
+            @Html.PagedListPager(Model, page => Url.Action("Index", new { page }))
+        </div> *@
+    </div>
     <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
 </div>
 
@@ -44,19 +86,33 @@
             pieChart = new Chart(ctx, {
                 type: 'pie',
                 data: {
-                    labels: data.map(item => item.CityName),
+                    labels: data.map(item => item.cityName),
                     datasets: [{
-                        data: data.map(item => item.UserCount),
+                        data: data.map(item => item.userCount),
                         backgroundColor: [
                             'rgba(255, 99, 132, 0.7)',
                             'rgba(54, 162, 235, 0.7)',
                             'rgba(255, 206, 86, 0.7)',
+                            'rgba(255, 99, 86, 0.7)',
+                            'rgba(54, 99, 86, 0.7)',
+                            'rgba(54, 99, 132, 0.7)',
+                            'rgba(255, 99, 132, 0.7)',
+                            'rgba(255, 206, 132, 0.7)',
+                            'rgba(255, 206, 86, 0.7)',
+                            'rgba(255, 99, 86, 0.7)',
                             // Add more colors as needed
                         ],
                         borderColor: [
                             'rgba(255, 99, 132, 1)',
                             'rgba(54, 162, 235, 1)',
                             'rgba(255, 206, 86, 1)',
+                            'rgba(255, 99, 86, 1)',
+                            'rgba(54, 99, 86, 1)',
+                            'rgba(54, 99, 132, 1)',
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(255, 206, 132, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(255, 99, 86, 1)',
                             // Add more colors as needed
                         ],
                         borderWidth: 1
@@ -73,5 +129,43 @@
         // Initial data fetch and chart rendering
         fetchDataAndRefreshChart();
     });
+</script>
+<script>
+    $(document).ready(function () {
+        loadData(1); // Load data for the first page on document ready
+    });
+
+    function loadData(page) {
+        $.ajax({
+            type: "GET",
+            url: "api/User/GetUsers",
+            data: { page: page },
+            success: function (result) {
+                updateTable(result);
+            },
+            error: function (error) {
+                console.error("Error loading data:", error);
+            }
+        });
+    }
+
+    function updateTable(data) {
+        var table = $("#userTable");
+        table.empty(); // Clear existing content
+
+        // Add table headers
+        var headers = "<thead><tr><th>Name</th><th>Family</th><th>City</th><th>Country</th></tr></thead>";
+        table.append(headers);
+
+        // Add table rows
+        var tbody = "<tbody>";
+        $.each(data, function (index, user) {
+            var row = `<tr><td>${user.Name}</td><td>${user.Family}</td><td>${user.CityName}</td><td>${user.CountryName}</td></tr>`;
+            tbody += row;
+        });
+        tbody += "</tbody>";
+
+        table.append(tbody);
+    }
 </script>
 

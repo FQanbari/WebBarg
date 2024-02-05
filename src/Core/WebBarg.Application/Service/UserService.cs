@@ -1,4 +1,5 @@
 ﻿using System.Threading;
+using WebBarg.Application.DTO;
 using WebBarg.Application.Interfaces;
 using WebBarg.Domain.Entities;
 using WebBarg.Domain.Repos;
@@ -17,9 +18,11 @@ public class UserService : IUserService
     }
 
 
-    public async Task<IEnumerable<User>> GetAllUsersAsync(string filter, int pageNumber, CancellationToken cancellationToken)
+    public async Task<IEnumerable<UserDto>> GetAllUsersAsync(string filter, int pageNumber, CancellationToken cancellationToken)
     {
-        return await _unitOfWork.UserRepository.GetListPaging(x => x.Name.Contains(filter), cancellationToken, pageSize: 10, pageNumber);
+        var user = await _unitOfWork.UserRepository.GetListPaging(x => x.Name.Contains(filter), cancellationToken, pageSize: 10, pageNumber);
+
+        return user.Select(x => new UserDto { Name = x.Name, Family = x.Family, CityName = x.City.Name, CountryName = x.Country.Name }).ToList();
     }
 
     public async Task<User> CreateUserAsync(User newUser, CancellationToken cancellationToken)

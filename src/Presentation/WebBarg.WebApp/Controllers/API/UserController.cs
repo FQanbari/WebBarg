@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using WebBarg.Application.DTO;
 using WebBarg.Application.Interfaces;
 using WebBarg.Domain.Entities;
 
@@ -54,6 +55,13 @@ namespace WebBarg.WebApp.Controllers.API
             var data = await _userService.GetStatisticsAsync(filter, cancellationToken);
 
             return data;
+        }
+        [HttpGet]
+        public async Task<List<UserDto>> GetUsers(string filter, int? pageNumber, CancellationToken cancellationToken)
+        {
+            var data = await _userService.GetAllUsersAsync(filter, pageNumber ?? 1, cancellationToken);
+
+            return data.ToList();
         }
     }
 }
