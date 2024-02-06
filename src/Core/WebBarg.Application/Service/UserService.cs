@@ -18,11 +18,21 @@ public class UserService : IUserService
     }
 
 
-    public async Task<IEnumerable<UserDto>> GetAllUsersAsync(string filter, int pageNumber, CancellationToken cancellationToken)
+    public async Task<PagedData<UserDto>> GetAllUsersAsync(string filter, int pageNumber, int pageSize, CancellationToken cancellationToken)
     {
-        var user = await _userRepository.GetListPaging(x => string.IsNullOrWhiteSpace(filter) || x.Name.Contains(filter), cancellationToken, pageSize: 10, pageNumber);
+        var user = await _userRepository.GetListPaging(x => string.IsNullOrWhiteSpace(filter) || x.Name.Contains(filter), cancellationToken, pageSize, pageNumber);
+        var result = new PagedData<UserDto>
+        {
+            PageInfo = new PageInfo
+            {
+                PageSize = pageSize,
+                PageNumber = pageNumber
+            }
+        };
 
-        return user.Select(x => new UserDto { Name = x.Name, Family = x.Family, CityName = x.City.Name, CountryName = x.Country.Name }).ToList();
+        result.Data = user.Select(x => new UserDto { Name = x.Name, Family = x.Family, CityName = x.City.Name, CountryName = x.Country.Name }).ToList();
+        result.PageInfo.TotalCount = await _unitOfWork.UserRepository.Count(x => string.IsNullOrWhiteSpace(filter) || x.Name.Contains(filter),cancellationToken);
+        return result;
     }
 
     public async Task<User> CreateUserAsync(User newUser, CancellationToken cancellationToken)
@@ -73,3 +83,16 @@ public class UserService : IUserService
         return statistics;
     }
 }
+//public class CityService
+//{
+//    private readonly IGenericRepository<City> _cityRepository;
+//    private readonly IUnitOfWork _unitOfWork;
+
+//    public CityService(IGenericRepository<City> cityRepository, IUnitOfWork unitOfWork)
+//    {
+//        _cityRepository = cityRepository;
+//        _unitOfWork = unitOfWork;
+//    }
+
+
+//}

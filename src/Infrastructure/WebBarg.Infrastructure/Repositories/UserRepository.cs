@@ -33,6 +33,7 @@ public class UserRepository : GenericRepository<User>, IUserRepository
 
         return groupedUsers;
     }
-    public Task<List<User>> GetListPaging(Expression<Func<User, bool>> predicate, CancellationToken cancellationToken, int pageSize = 10, int pageNumber = 1)
+    public Task<List<User>> GetListPaging(Expression<Func<User, bool>> predicate, CancellationToken cancellationToken, int pageSize, int pageNumber = 1)
       => dbSet.Include(x => x.Country).Include(x => x.City).AsNoTracking().Where(predicate).Skip(pageSize * (pageNumber - 1)).Take(pageSize).ToListAsync(cancellationToken);
 }
+

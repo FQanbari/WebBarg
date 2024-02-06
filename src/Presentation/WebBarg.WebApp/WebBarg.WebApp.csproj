@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -18,6 +18,10 @@
   <ItemGroup>
     <ProjectReference Include="..\..\Core\WebBarg.Application\WebBarg.Application.csproj" />
     <ProjectReference Include="..\..\Infrastructure\WebBarg.Infrastructure\WebBarg.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="wwwroot\images\" />
   </ItemGroup>
 
 </Project>
