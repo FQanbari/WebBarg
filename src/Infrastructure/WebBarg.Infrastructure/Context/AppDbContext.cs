@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Bogus;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using System;
 using System.Collections.Generic;
@@ -55,36 +56,31 @@ public class AppDbContext : DbContext
 
     public static void SeedData( AppDbContext context)
     {
-        // Seed countries
-        var countries = new List<Country>();
-        if (!context.Cities.Any()) 
+        if (context.Database.IsSqlServer())
         {
-            countries = GetCountriesWithCities();
+            context.Database.Migrate();
+        }
+        // Seed users
+        if (!context.Countries.Any())
+        {
+            var countries = DataGenerator.GenerateCountries(10);
             context.Countries.AddRange(countries);
             context.SaveChanges();
         }
 
-        countries = context.Countries.Include(x => x.Cities).ToList();
-        // Seed users
-        var users = new List<User>();
-        var random = new Random();
+        if (!context.Cities.Any())
+        {
+            var cities = DataGenerator.GenerateCities(context.Countries.ToList(), 30);
+            context.Cities.AddRange(cities);
+            context.SaveChanges();
+        }
+
         if (!context.Users.Any())
         {
-            for (int i = 1; i <= 50; i++)
-            {
-                int index = random.Next(1, 10);
-                users.Add(new User
-                {
-                    Name = $"User{i}",
-                    Family = $"Family{i}",
-                    Picture = $"Picture{i}",
-                    CityId = countries[index].Cities.First().Id,
-                    CountryId = countries[index].Id
-                });
-            }
+            var users = DataGenerator.GenerateUsers(context.Cities.ToList(), context.Countries.ToList(), 100);
             context.Users.AddRange(users);
             context.SaveChanges();
-        }    
+        }
     }
 
     public static List<Country> GetCountriesWithCities()
@@ -117,7 +113,37 @@ public class AppDbContext : DbContext
         return cities;
     }
 }
+public class DataGenerator
+{
+    public static List<Country> GenerateCountries(int count)
+    {
+        var fakeCountry = new Faker<Country>()
+            .RuleFor(c => c.Name, f => f.Address.Country());
 
+        return fakeCountry.Generate(count);
+    }
+
+    public static List<City> GenerateCities(List<Country> countries, int count)
+    {
+        var fakeCity = new Faker<City>()
+            .RuleFor(c => c.Name, f => f.Address.City())
+            .RuleFor(c => c.CountryId, f => f.PickRandom(countries).Id);
+
+        return fakeCity.Generate(count);
+    }
+
+    public static List<User> GenerateUsers(List<City> cities, List<Country> countries, int count)
+    {
+        var fakeUser = new Faker<User>()
+            .RuleFor(u => u.Name, f => f.Name.FirstName())
+            .RuleFor(u => u.Family, f => f.Name.LastName())
+            .RuleFor(u => u.Picture, f => f.Image.PicsumUrl())
+            .RuleFor(u => u.CityId, f => f.PickRandom(cities).Id)
+            .RuleFor(u => u.CountryId, f => f.PickRandom(countries).Id);
+
+        return fakeUser.Generate(count);
+    }
+}
 
 
 public class AppDbContextFactory : IDesignTimeDbContextFactory<AppDbContext>
@@ -125,8 +151,8 @@ public class AppDbContextFactory : IDesignTimeDbContextFactory<AppDbContext>
     AppDbContext IDesignTimeDbContextFactory<AppDbContext>.CreateDbContext(string[] args)
     {
         var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
-        optionsBuilder.UseSqlServer("Data Source=FATEMEH\\FQ2019;Initial Catalog=WebBargDb;TrustServerCertificate=True;Trusted_Connection=True;");
-        //optionsBuilder.UseSqlServer("Data Source=192.168.1.12;Initial Catalog=WebBargDb;User ID=sa;Password=ASdf!@34;TrustServerCertificate=True");
+        //optionsBuilder.UseSqlServer("Data Source=FATEMEH\\FQ2019;Initial Catalog=WebBargDb;TrustServerCertificate=True;Trusted_Connection=True;");
+        optionsBuilder.UseSqlServer("Data Source=192.168.1.12;Initial Catalog=WebBargDb;User ID=sa;Password=ASdf!@34;TrustServerCertificate=True");
 
         return new AppDbContext(optionsBuilder.Options);
     }
