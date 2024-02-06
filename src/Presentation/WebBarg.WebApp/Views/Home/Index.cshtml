@@ -6,6 +6,9 @@
 }
 
 <style>
+    .dataInfo {
+        margin-top:25px;
+    }
     .wrapper {
         width: 400px;
         height: 400px;
@@ -75,6 +78,32 @@
         justify-content: space-around;
         width: 100%;
         }
+
+    #filterInput {
+        width: 200px;
+        padding: 8px;
+        margin-right: 8px;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+    }
+
+    #refreshButton {
+        padding: 8px 16px;
+        background-color: #007bff;
+        color: #fff;
+        border: 1px solid #007bff;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+        #refreshButton:hover {
+            background-color: #0056b3;
+            border-color: #0056b3;
+        }
+        .searchbox{
+        display: flex;
+        justify-content: center;
+        }
 </style>
 <div class="text-center">
     <h1 class="display-4">Welcome</h1>
@@ -120,9 +149,12 @@
         </div>
 
     </div>
-    <div>
-        <input type="text" id="filterInput" placeholder="Enter Filter Value" />
-        <button id="refreshButton">Refresh Data</button>
+    <div class="dataInfo">
+
+        <div class="searchbox">
+            <input type="text" class="form-control" id="filterInput" placeholder="Enter Filter Value">
+            <button class="btn btn-primary" id="refreshButton">Refresh Data</button>
+        </div>
         <div class="container_bar">
             <div class="wrapper">
                 <canvas id="pieChart" width="400" height="400"></canvas>
@@ -153,7 +185,6 @@
     </div>
    
     
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
 </div>
 
 <script>
@@ -254,7 +285,7 @@
             data: {
                 labels: data.map(item => item.cityName),
                 datasets: [{
-                    data: data.map(item => item.userCount),
+                    data: data.map(item => item.percentage),
                     backgroundColor: [
                         'rgba(255, 99, 132, 0.7)',
                         'rgba(54, 162, 235, 0.7)',
@@ -285,6 +316,45 @@
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                tooltips: {
+                    enabled: false
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltips: {
+                        enabled: true,
+                        mode: 'single',
+                        callbacks: {
+                            label: function (tooltipItem, data) {
+                                var allData = data.datasets[tooltipItem.datasetIndex].data;
+                                var tooltipLabel = data.labels[tooltipItem.index];
+                                var tooltipData = allData[tooltipItem.index];
+                                return tooltipLabel + ": " + tooltipData + "%";
+                                
+                            }
+                        }
+                    },
+                    datalabels: {
+                        formatter: (value, ctx) => {
+                            let sum = 0;
+                            let dataArr = ctx.chart.data.datasets[0].data;
+                            dataArr.map((data) => {
+                                sum += data;
+                            });
+                            let percentage = ((value * 100) / sum).toFixed(2) + "%";
+                            return percentage;
+                        },
+                        color: "#FFF",
+                    },
+                },
+                onHover: function (e) {
+                    e.native.target.style.cursor = "pointer";
+                },
+                rotation: 270,
+                events: ["click"],
+                onClick: function (event, element) {
+                    console.log(element[0].index);
+                },
             }
         });
     }
