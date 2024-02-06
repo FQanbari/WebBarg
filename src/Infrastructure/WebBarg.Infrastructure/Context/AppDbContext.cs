@@ -146,14 +146,3 @@ public class DataGenerator
 }
 
 
-public class AppDbContextFactory : IDesignTimeDbContextFactory<AppDbContext>
-{ 
-    AppDbContext IDesignTimeDbContextFactory<AppDbContext>.CreateDbContext(string[] args)
-    {
-        var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
-        //optionsBuilder.UseSqlServer("Data Source=FATEMEH\\FQ2019;Initial Catalog=WebBargDb;TrustServerCertificate=True;Trusted_Connection=True;");
-        optionsBuilder.UseSqlServer("Data Source=192.168.1.12;Initial Catalog=WebBargDb;User ID=sa;Password=ASdf!@34;TrustServerCertificate=True");
-
-        return new AppDbContext(optionsBuilder.Options);
-    }
-}
