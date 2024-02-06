@@ -20,7 +20,7 @@ public class UserService : IUserService
 
     public async Task<IEnumerable<UserDto>> GetAllUsersAsync(string filter, int pageNumber, CancellationToken cancellationToken)
     {
-        var user = await _unitOfWork.UserRepository.GetListPaging(x => x.Name.Contains(filter), cancellationToken, pageSize: 10, pageNumber);
+        var user = await _userRepository.GetListPaging(x => string.IsNullOrWhiteSpace(filter) || x.Name.Contains(filter), cancellationToken, pageSize: 10, pageNumber);
 
         return user.Select(x => new UserDto { Name = x.Name, Family = x.Family, CityName = x.City.Name, CountryName = x.Country.Name }).ToList();
     }
@@ -68,7 +68,7 @@ public class UserService : IUserService
     }
     public async Task<List<UserStatistics>> GetStatisticsAsync(string filter, CancellationToken cancellationToken)
     {
-        var statistics = await _userRepository.GetListByCity(x => x.Name.Contains(filter), cancellationToken);
+        var statistics = await _userRepository.GetListByCity(x => string.IsNullOrWhiteSpace(filter) || x.Name.Contains(filter), cancellationToken);
 
         return statistics;
     }

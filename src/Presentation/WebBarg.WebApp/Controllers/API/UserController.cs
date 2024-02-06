@@ -50,14 +50,14 @@ namespace WebBarg.WebApp.Controllers.API
         }
 
         [HttpGet]
-        public async Task<List<UserStatistics>> ChartPie(string filter, CancellationToken cancellationToken)
+        public async Task<List<UserStatistics>> ChartPie(CancellationToken cancellationToken, string? filter = null)
         {
             var data = await _userService.GetStatisticsAsync(filter, cancellationToken);
 
             return data;
         }
         [HttpGet]
-        public async Task<List<UserDto>> GetUsers(string filter, int? pageNumber, CancellationToken cancellationToken)
+        public async Task<List<UserDto>> GetUsers(CancellationToken cancellationToken, string? filter = null, int? pageNumber = 1)
         {
             var data = await _userService.GetAllUsersAsync(filter, pageNumber ?? 1, cancellationToken);
 

@@ -11,4 +11,5 @@ namespace WebBarg.Domain.Repos;
 public interface IUserRepository : IGenericRepository<User>
 {
     Task<List<UserStatistics>> GetListByCity(Expression<Func<User, bool>> predicate, CancellationToken cancellationToken);
+    //Task<List<User>> GetListPaging(Expression<Func<User, bool>> predicate, CancellationToken cancellationToken, int pageSize = 10, int pageNumber = 1);
 }

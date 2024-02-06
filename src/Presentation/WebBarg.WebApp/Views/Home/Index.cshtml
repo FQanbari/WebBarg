@@ -11,55 +11,125 @@
         height: 400px;
         border: 1px solid black; /* for demonstration purposes*/
     }
+
+    body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+    }
+
+    h2 {
+        color: #333;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+
+    th, td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+    }
+
+    th {
+        background-color: #f2f2f2;
+    }
+
+    tr:hover {
+        background-color: #f5f5f5;
+    }
+    .container_bar{
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+    }
 </style>
 <div class="text-center">
     <h1 class="display-4">Welcome</h1>
     <input type="text" id="filterInput" placeholder="Enter Filter Value" />
     <button id="refreshButton">Refresh Data</button>
-
-    <div class="wrapper">
-        <canvas id="pieChart" width="400" height="400"></canvas>
-    </div>
-    <div>
-        <h2>User List</h2>
-
-      @*   <table border="1">
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Family</th>
-                    <th>City</th>
-                    <th>Country</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var user in Model)
-                {
-                    <tr>
-                        <td>@user.Name</td>
-                        <td>@user.Family</td>
-                        <td>@user.CityName</td>
-                        <td>@user.CountryName</td>
-                    </tr>
-                }
-            </tbody>
-        </table> *@
-
-        @* <div>
-            Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
+    <div class="container_bar">
+        <div class="wrapper">
+            <canvas id="pieChart" width="400" height="400"></canvas>
         </div>
         <div>
-            @Html.PagedListPager(Model, page => Url.Action("Index", new { page }))
-        </div> *@
-    </div>
+            <h2>User List</h2>
+
+
+            <table id="userTable" border="1">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Family</th>
+                        <th>City</th>
+                        <th>Country</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Table content will be loaded dynamically here -->
+                </tbody>
+            </table>
+
+            <div id="paginationContainer">
+                <!-- Pagination controls will be loaded dynamically here -->
+            </div>
+        </div>
+</div>
+    
     <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
 </div>
 
 <script>
+    $(document).ready(function () {
+        loadData(1); // Load data for the first page on document ready
+    });
+
+    function loadData(page) {
+        $.ajax({
+            type: "GET",
+            url: "api/user/GetUsers",
+            data: { filter: "", pageNumber: page },
+            success: function (result) {
+                updateTable(result);
+                updatePagination(result);
+            },
+            error: function (error) {
+                console.error("Error loading data:", error);
+            }
+        });
+    }
+
+    function updateTable(data) {
+        var table = $("#userTable");
+        table.find("tbody").empty(); // Clear existing content
+
+        // Add table rows
+        $.each(data, function (index, user) {
+            var row = `<tr><td>${user.name}</td><td>${user.family}</td><td>${user.cityName}</td><td>${user.countryName}</td></tr>`;
+            table.find("tbody").append(row);
+        });
+    }
+
+    function updatePagination(data) {
+        var paginationContainer = $("#paginationContainer");
+        paginationContainer.empty(); // Clear existing content
+
+        // Add pagination controls
+        var pagination = `<nav aria-label="Page navigation"><ul class="pagination">`;
+        for (var i = 1; i <= data.TotalPages; i++) {
+            pagination += `<li class="page-item${i === data.PageNumber ? ' active' : ''}"><a class="page-link" href="#" onclick="loadData(${i})">${i}</a></li>`;
+        }
+        pagination += `</ul></nav>`;
+
+        paginationContainer.append(pagination);
+    }
     document.addEventListener('DOMContentLoaded', function () {
         var pieChartCanvas = document.getElementById('pieChart');
         var refreshButton = document.getElementById('refreshButton');
         var filterInput = document.getElementById('filterInput');
+        fetchDataAndRefreshChart();
 
         var pieChart;
 
@@ -129,43 +199,5 @@
         // Initial data fetch and chart rendering
         fetchDataAndRefreshChart();
     });
-</script>
-<script>
-    $(document).ready(function () {
-        loadData(1); // Load data for the first page on document ready
-    });
-
-    function loadData(page) {
-        $.ajax({
-            type: "GET",
-            url: "api/User/GetUsers",
-            data: { page: page },
-            success: function (result) {
-                updateTable(result);
-            },
-            error: function (error) {
-                console.error("Error loading data:", error);
-            }
-        });
-    }
-
-    function updateTable(data) {
-        var table = $("#userTable");
-        table.empty(); // Clear existing content
-
-        // Add table headers
-        var headers = "<thead><tr><th>Name</th><th>Family</th><th>City</th><th>Country</th></tr></thead>";
-        table.append(headers);
-
-        // Add table rows
-        var tbody = "<tbody>";
-        $.each(data, function (index, user) {
-            var row = `<tr><td>${user.Name}</td><td>${user.Family}</td><td>${user.CityName}</td><td>${user.CountryName}</td></tr>`;
-            tbody += row;
-        });
-        tbody += "</tbody>";
-
-        table.append(tbody);
-    }
 </script>
 
